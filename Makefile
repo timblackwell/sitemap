@@ -1,6 +1,9 @@
 install: build
 	go install
 
+deps: 
+	go get ./...
+	
 build: test
 	go build
 
