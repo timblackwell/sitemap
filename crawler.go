@@ -58,8 +58,8 @@ func (crawler *crawler) crawl(url string) {
 	for _, u := range page.links {
 		wg.Add(1)
 		go func(url string) {
-			defer wg.Done()
 			crawler.crawl(url)
+			wg.Done()
 		}(u)
 	}
 	wg.Wait()
