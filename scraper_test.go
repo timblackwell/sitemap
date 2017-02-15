@@ -54,3 +54,17 @@ func TestScraper(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkScraper(b *testing.B) {
+	in := bytes.NewBufferString(
+		"<a href=\"https://golang.org/\">golang.org</a>" +
+			"<a href=\"https://monzo.me\">monzo.me</a>" +
+			"<script async src=\"/assets/script.js\"></script>" +
+			"<script async src=\"/assets/script.js\"></script>" +
+			"<link rel=\"stylesheet\" type=\"text/css\" href=\"http://googlecode.com/prettify.css\">",
+	)
+	for n := 0; n < b.N; n++ {
+		scrape(in)
+		in.Reset()
+	}
+}

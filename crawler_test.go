@@ -95,3 +95,35 @@ func TestCrawler(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkCrawler(b *testing.B) {
+	url := "https://golang.org/"
+	body := bytes.NewBufferString(
+		"<a href=\"https://golang.org/\">golang.org</a>" +
+			"<a href=\"https://monzo.me\">monzo.me</a>" +
+			"<script async src=\"/assets/script.js\"></script>" +
+			"<script async src=\"/assets/script.js\"></script>" +
+			"<link rel=\"stylesheet\" type=\"text/css\" href=\"http://googlecode.com/prettify.css\">",
+	)
+	httpGet := func(url string) (*http.Response, error) {
+		body.Reset()
+		resp := http.Response{
+			Body: ioutil.NopCloser(body),
+		}
+		return &resp, nil
+	}
+	scraper := func(r io.Reader) (map[string]atom.Atom, error) {
+		return map[string]atom.Atom{
+			"https://golang.org/":      atom.A,
+			"https://golang.org/about": atom.A,
+			"/assets/stylesheet.css":   atom.Link,
+			"/assets/script.js":        atom.Script,
+			"https://monzo.me":         atom.A,
+		}, nil
+	}
+	nopLogf := func(string, ...interface{}) {}
+
+	for n := 0; n < b.N; n++ {
+		SiteMap(url, httpGet, scraper, nopLogf)
+	}
+}
