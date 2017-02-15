@@ -1,4 +1,6 @@
 # SiteMapper
+[![Build Status](https://travis-ci.org/timblackwell/sitemap.svg?branch=master)](https://travis-ci.org/timblackwell/sitemap)
+
 This program will crawl from a given seen url and build a site map of all pages for domain.
 External assess/resources will be listed but the crawler will not follow any external links.
 
