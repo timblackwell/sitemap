@@ -40,29 +40,28 @@ func SiteMap(url string, httpGet HTTPGet, scraper Scraper, logger Logf) map[stri
 		domain:  strings.TrimSuffix(url, "/"),
 		pages:   &SafePages{v: pages},
 	}
-	crawler.crawl(url)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	crawler.crawl(url, &wg)
+	wg.Wait()
 	return pages
 }
 
 // crawl gets the page repersentation of url and
 // then recurses over links found pn page.
 // If page already exists for url, the fuction exits.
-func (crawler *crawler) crawl(url string) {
-	if _, exists := crawler.pages.Read(url); exists {
-		return
-	}
+func (crawler *crawler) crawl(url string, wg *sync.WaitGroup) {
 	crawler.printf("getting page: %s\n", url)
 	page := crawler.getPage(url)
 	crawler.pages.Write(url, page)
-	var wg sync.WaitGroup
 	for _, u := range page.links {
+		if _, exists := crawler.pages.Read(u); exists {
+			continue
+		}
 		wg.Add(1)
-		go func(url string) {
-			crawler.crawl(url)
-			wg.Done()
-		}(u)
+		go crawler.crawl(u, wg)
 	}
-	wg.Wait()
+	wg.Done()
 }
 
 // getPage will get the repersentation Page for given url filtering out
